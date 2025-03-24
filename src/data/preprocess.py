@@ -1,6 +1,12 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+def save_processed_data(X_train, X_test, y_train, y_test, path="data/processed/"):
+    X_train.to_csv(f"{path}X_train.csv", index=False)
+    X_test.to_csv(f"{path}X_test.csv", index=False)
+    y_train.to_csv(f"{path}y_train.csv", index=False)
+    y_test.to_csv(f"{path}y_test.csv", index=False)
+
 def load_data(filepath="data/raw/telco_churn.csv"):
     df = pd.read_csv(filepath)
 
@@ -12,13 +18,12 @@ def load_data(filepath="data/raw/telco_churn.csv"):
 
     # Convert total charges to numeric (handle missing)
     df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
-    df['TotalCharges'].fillna(df['TotalCharges'].median(), inplace=True)
+    df['TotalCharges'] = df['TotalCharges'].fillna(df['TotalCharges'].median())
 
     # One-hot encode categorical features
     df = pd.get_dummies(df, drop_first=True)
 
     # Train-test split
-
     # All columns except the target is X
     X = df.drop('Churn', axis=1)
 
@@ -27,8 +32,6 @@ def load_data(filepath="data/raw/telco_churn.csv"):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    return X_train, X_test, y_train, y_test
+    save_processed_data(X_train, X_test, y_train, y_test)
 
-
-X_train, X_test, y_train, y_test = load_data()
-print(f"X_train: {X_train.shape}, X_test: {X_test.shape}")
+load_data()
