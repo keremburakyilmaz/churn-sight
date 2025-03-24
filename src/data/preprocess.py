@@ -10,6 +10,9 @@ def save_processed_data(X_train, X_test, y_train, y_test, path="data/processed/"
 def load_data(filepath="data/raw/telco_churn.csv"):
     df = pd.read_csv(filepath)
 
+    # Clean whitespaces
+    df.columns = df.columns.str.replace(" ", "_")
+
     # Drop customerID, not useful for predictions
     df.drop('customerID', axis=1, inplace=True)
 
