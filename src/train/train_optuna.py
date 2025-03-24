@@ -1,9 +1,8 @@
 import optuna
 import mlflow
 import mlflow.lightgbm
-import lightgbm as lgb
 import pandas as pd
-from sklearn.metrics import accuracy_score, roc_auc_score
+import joblib
 from optuna.integration.mlflow import MLflowCallback
 from train_baseline import train_baseline
 
@@ -17,7 +16,6 @@ def load_processed_data(path="data/processed/"):
 
 # Objective function for Optuna
 def objective(trial):
-    # Define search space
     params = {
         "objective": "binary",
         "metric": "auc",
@@ -33,32 +31,43 @@ def objective(trial):
         "lambda_l2": trial.suggest_float("lambda_l2", 1e-8, 10.0, log=True),
     }
 
-    # Train LightGBM model
+    # Train and evaluate
     _, _, roc_auc, _, _ = train_baseline(params)
-
     return roc_auc
 
+# Optuna training + MLflow logging + model save
 def train_with_optuna():
     mlflow.set_experiment("churn-optuna-tuning")
 
-    # Optuna study
+    # Create Optuna study
     study = optuna.create_study(direction="maximize")
-    mlflow_callback = MLflowCallback(tracking_uri = mlflow.get_tracking_uri(), metric_name = "roc_auc")
-
+    mlflow_callback = MLflowCallback(tracking_uri=mlflow.get_tracking_uri(), metric_name="roc_auc")
+    
     # Run optimization
     study.optimize(objective, n_trials=20, callbacks=[mlflow_callback])
 
-    # Get best model params
+    # Best hyperparameters
     best_params = study.best_params
-    print(f"Best params: {best_params}")
+    print(f"Best parameters found: {best_params}")
 
-    # Save best model
-    best_model, _, _, _, _ = train_baseline(best_params)
+    # Retrain final model with best params
+    best_model, _, roc_auc, accuracy, _ = train_baseline(best_params)
 
-    # Log best model
+    # Save model locally (for DVC tracking)
+    model_path = "models/lightgbm_best_model.pkl"
+    joblib.dump(best_model, model_path)
+    print(f"Saved best model to: {model_path}")
+
+    # Log final model + metrics to MLflow
     with mlflow.start_run(run_name="best-optuna-model"):
         mlflow.log_params(best_params)
-        mlflow.lightgbm.log_model(best_model, "best_model")
+        mlflow.log_metrics({
+            "accuracy": accuracy,
+            "roc_auc": roc_auc
+        })
+        mlflow.log_artifact(model_path, artifact_path="model_files")
+        mlflow.lightgbm.log_model(best_model, artifact_path="mlflow_model")
+        print("Logged best model to MLflow.")
 
 
 train_with_optuna()

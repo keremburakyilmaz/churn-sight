@@ -14,26 +14,14 @@ def load_processed_data(path="data/processed/"):
 # Train a baseline LightGBM model and log results to MLflow
 def train_baseline(params):
     X_train, X_test, y_train, y_test = load_processed_data()
-
-    mlflow.set_experiment("churn-baseline")
-
-    with mlflow.start_run(run_name = "lightgbm-baseline"):
-        model = lgb.LGBMClassifier(**params, random_state = 42)
-        model.fit(X_train, y_train)
-
-        y_pred = model.predict(X_test)
-        y_proba = model.predict_proba(X_test)[:, 1]
-
-        acc = accuracy_score(y_test, y_pred)
-        roc_auc = roc_auc_score(y_test, y_proba)
-
-        mlflow.log_params(model.get_params())
-        mlflow.log_metrics({
-            "accuracy": acc,
-            "roc_auc": roc_auc
-        })
-
-        mlflow.lightgbm.log_model(model, artifact_path = "model")
-
     
-    return model, acc, roc_auc, y_pred, y_proba
+    model = lgb.LGBMClassifier(**params)
+    model.fit(X_train, y_train)
+    
+    y_pred = model.predict(X_test)
+    y_proba = model.predict_proba(X_test)[:, 1]
+
+    acc = accuracy_score(y_test, y_pred)
+    roc_auc = roc_auc_score(y_test, y_proba)
+
+    return model, y_pred, roc_auc, acc, y_proba

@@ -1,5 +1,0 @@
-outs:
-- md5: c48014d7297bd16cf6024d9fa42713b2
-  size: 955188
-  hash: md5
-  path: lightgbm_best_model.pkl
