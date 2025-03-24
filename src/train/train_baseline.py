@@ -11,13 +11,14 @@ def load_processed_data(path="data/processed/"):
     y_test = pd.read_csv(f"{path}y_test.csv").squeeze()
     return X_train, X_test, y_train, y_test
 
-def train_baseline():
+# Train a baseline LightGBM model and log results to MLflow
+def train_baseline(params):
     X_train, X_test, y_train, y_test = load_processed_data()
 
     mlflow.set_experiment("churn-baseline")
 
     with mlflow.start_run(run_name = "lightgbm-baseline"):
-        model = lgb.LGBMClassifier(random_state = 42)
+        model = lgb.LGBMClassifier(**params, random_state = 42)
         model.fit(X_train, y_train)
 
         y_pred = model.predict(X_test)
@@ -34,6 +35,5 @@ def train_baseline():
 
         mlflow.lightgbm.log_model(model, artifact_path = "model")
 
-        print(f"Baseline model trained: Accuracy={acc:.4f}, ROC AUC={roc_auc:.4f}")
-
-train_baseline()
+    
+    return model, acc, roc_auc, y_pred, y_proba
