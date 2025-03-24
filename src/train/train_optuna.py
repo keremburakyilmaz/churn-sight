@@ -53,7 +53,7 @@ def train_with_optuna():
     # Retrain final model with best params
     best_model, _, roc_auc, accuracy, _ = train_baseline(best_params)
 
-    # Save model locally (for DVC tracking)
+    # Save the best models
     model_path = "models/lightgbm_best_model.pkl"
     joblib.dump(best_model, model_path)
     print(f"Saved best model to: {model_path}")
