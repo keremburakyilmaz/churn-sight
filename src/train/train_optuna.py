@@ -5,6 +5,9 @@ import pandas as pd
 import joblib
 from optuna.integration.mlflow import MLflowCallback
 from train_baseline import train_baseline
+from datetime import datetime
+import json
+
 
 # Load processed data
 def load_processed_data(path="data/processed/"):
@@ -56,6 +59,18 @@ def train_with_optuna():
     # Save the best models
     model_path = "models/lightgbm_best_model.pkl"
     joblib.dump(best_model, model_path)
+
+    metadata = {
+        "model_path": model_path,
+        "trained_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "accuracy": accuracy,
+        "roc_auc": roc_auc,
+        "best_params": best_params
+    }
+
+    with open("models/model_metadata.json", "w") as f:
+        json.dump(metadata, f, indent=4)
+
     print(f"Saved best model to: {model_path}")
 
     # Log final model + metrics to MLflow
