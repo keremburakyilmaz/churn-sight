@@ -18,7 +18,7 @@ model = joblib.load(MODEL_PATH)
 
 X_train = pd.read_csv("data/processed/X_train.csv")
 
-explainer = shap.TreeExplainer(model, data=X_train)
+explainer = shap.Explainer(model.predict, X_train)
 
 feature_order = [
     "SeniorCitizen", "tenure", "MonthlyCharges", "TotalCharges", "gender_Male", "Partner_Yes", "Dependents_Yes",
