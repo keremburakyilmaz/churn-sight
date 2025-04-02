@@ -44,7 +44,7 @@ def root():
 
 def make_prediction(data: CustomerFeatures):
     # Helper function to do prediction
-    input_data = np.array([[getattr(data, feat) for feat in feature_order]])
+    input_data = pd.DataFrame([[getattr(data, feat) for feat in feature_order]], columns=feature_order)
     prediction = model.predict(input_data)[0]
     probability = model.predict_proba(input_data)[0][1]
     return prediction, probability, input_data
