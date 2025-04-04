@@ -1,5 +1,3 @@
-import mlflow
-import mlflow.lightgbm
 import lightgbm as lgb
 import pandas as pd
 from sklearn.metrics import accuracy_score, roc_auc_score
