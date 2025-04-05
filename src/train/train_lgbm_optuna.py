@@ -4,7 +4,7 @@ import mlflow.lightgbm
 import pandas as pd
 import joblib
 from optuna.integration.mlflow import MLflowCallback
-from train_baseline import train_baseline
+from train.train_lgbm import train_lgbm
 from datetime import datetime
 import json
 
@@ -35,7 +35,7 @@ def objective(trial):
     }
 
     # Train and evaluate
-    _, _, roc_auc, _, _ = train_baseline(params)
+    _, _, roc_auc, _, _ = train_lgbm(params)
     return roc_auc
 
 # Optuna training + MLflow logging + model save
@@ -54,7 +54,7 @@ def train_with_optuna():
     print(f"Best parameters found: {best_params}")
 
     # Retrain final model with best params
-    best_model, _, roc_auc, accuracy, _ = train_baseline(best_params)
+    best_model, _, roc_auc, accuracy, _ = train_lgbm(best_params)
 
     # Save the best models
     model_path = "models/lightgbm_best_model.pkl"

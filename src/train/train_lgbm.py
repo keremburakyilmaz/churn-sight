@@ -9,8 +9,8 @@ def load_processed_data(path="data/processed/"):
     y_test = pd.read_csv(f"{path}y_test.csv").squeeze()
     return X_train, X_test, y_train, y_test
 
-# Train a baseline LightGBM model and log results to MLflow
-def train_baseline(params):
+# Train a baseline LightGBM model
+def train_lgbm(params):
     X_train, X_test, y_train, y_test = load_processed_data()
     
     model = lgb.LGBMClassifier(**params)
