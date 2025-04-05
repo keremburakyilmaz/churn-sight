@@ -25,6 +25,7 @@ def load_data(filepath="data/raw/telco_churn.csv"):
 
     # One-hot encode categorical features
     df = pd.get_dummies(df, drop_first=True)
+    df = df.astype(int)
 
     # Train-test split
     # All columns except the target is X
