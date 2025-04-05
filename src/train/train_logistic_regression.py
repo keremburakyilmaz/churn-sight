@@ -1,48 +1,56 @@
 import numpy as np
-import joblib
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import accuracy_score, roc_auc_score
+from train_optuna import run_optuna, load_processed_data
 
 class LogisticRegression:
     def __init__(self, lr=0.01, n_iters=1000):
         self.lr = lr
         self.n_iters = n_iters
-        self.weights = None
-        self.bias = None
 
-    def sigmoid(self, x):
-        x = np.clip(x, -500, 500)  
-        return 1 / (1 + np.exp(-x))
+    def _sigmoid(self, x):
+        return 1 / (1 + np.exp(-np.clip(x, -500, 500)))
 
     def fit(self, X, y):
-        n_samples, n_features = X.shape
-        self.weights = np.zeros(n_features)
+        X = np.array(X)
+        y = np.array(y)
+        self.weights = np.zeros(X.shape[1])
         self.bias = 0
 
         for _ in range(self.n_iters):
-            linear = np.dot(X, self.weights) + self.bias
-            predictions = self.sigmoid(linear)
-
-            dw = (1 / n_samples) * np.dot(X.T, (predictions - y))
-            db = (1 / n_samples) * np.sum(predictions - y)
-
+            model = np.dot(X, self.weights) + self.bias
+            predictions = self._sigmoid(model)
+            dw = (1 / len(X)) * np.dot(X.T, (predictions - y))
+            db = (1 / len(X)) * np.sum(predictions - y)
             self.weights -= self.lr * dw
             self.bias -= self.lr * db
 
     def predict(self, X):
-        linear = np.dot(X, self.weights) + self.bias
-        return (self.sigmoid(linear) >= 0.5).astype(int)
+        X = np.array(X)
+        linear_model = np.dot(X, self.weights) + self.bias
+        return (self._sigmoid(linear_model) >= 0.5).astype(int)
 
     def predict_proba(self, X):
-        linear = np.dot(X, self.weights) + self.bias
-        probs = self.sigmoid(linear)
-        return np.stack([1 - probs, probs], axis=1)
+        X = np.array(X)
+        return self._sigmoid(np.dot(X, self.weights) + self.bias)
 
-def evaluate_model(model, X_val, y_val):
-    proba = model.predict_proba(X_val)[:, 1]
-    return roc_auc_score(y_val, proba)
+def train_logistic_regression(params):
+    X_train, X_test, y_train, y_test = load_processed_data()
+    model = LogisticRegression(**params)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    y_proba = model.predict_proba(X_test)
+    return model, {
+        "accuracy": accuracy_score(y_test, y_pred),
+        "roc_auc": roc_auc_score(y_test, y_proba)
+    }
 
-def save_model(model, path="models/logistic_regression_best_model.pkl"):
-    joblib.dump(model, path)
+def logistic_regression_objective(trial):
+    params = {
+        "lr": trial.suggest_float("lr", 1e-4, 1.0, log=True),
+        "n_iters": trial.suggest_int("n_iters", 500, 3000)
+    }
+    _, scores = train_logistic_regression(params)
+    return scores["roc_auc"]
 
-def load_model(path="models/logistic_regression_best_model.pkl"):
-    return joblib.load(path)
+if __name__ == "__main__":
+    run_optuna(logistic_regression_objective, train_logistic_regression, algo_name="logistic_regression", n_trials=30)

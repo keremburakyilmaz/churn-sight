@@ -1,0 +1,10 @@
+{
+    "model_path": "models/logistic_regression_best_model.pkl",
+    "trained_at": "2025-04-05 17:53:04",
+    "accuracy": 0.723207948899929,
+    "roc_auc": 0.7291707640233109,
+    "best_params": {
+        "lr": 0.0028492402919781568,
+        "n_iters": 2906
+    }
+}

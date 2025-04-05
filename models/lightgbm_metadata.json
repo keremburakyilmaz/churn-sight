@@ -1,0 +1,17 @@
+{
+    "model_path": "models/lightgbm_best_model.pkl",
+    "trained_at": "2025-04-05 17:48:36",
+    "accuracy": 0.8183108587650816,
+    "roc_auc": 0.8643731820675521,
+    "best_params": {
+        "n_estimators": 513,
+        "learning_rate": 0.02699993833695895,
+        "num_leaves": 299,
+        "max_depth": 3,
+        "min_child_samples": 8,
+        "subsample": 0.85419319124105,
+        "colsample_bytree": 0.6785825825472549,
+        "lambda_l1": 9.095947737158982,
+        "lambda_l2": 0.0002687019619666638
+    }
+}
