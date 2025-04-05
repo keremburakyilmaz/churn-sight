@@ -66,7 +66,7 @@ def predict_churn(data: CustomerFeatures):
 def explain_prediction(data: CustomerFeatures):
     # Tell which features contributed the most to the prediction
     prediction, probability, input_data = make_prediction(data)
-    shap_values = explainer.shap_values(input_data)[1]
+    shap_values = explainer.shap_values(input_data)
     feature_impacts = list(zip(feature_order, shap_values[0]))
     top_features = sorted(feature_impacts, key=lambda x: abs(x[1]), reverse=True)[:3]
 
