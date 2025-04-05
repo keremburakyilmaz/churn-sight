@@ -13,7 +13,8 @@ from datetime import datetime
 app = FastAPI()
 
 # Load model
-MODEL_PATH = os.path.join("models", "lightgbm_best_model.pkl")
+ALGO_NAME = "lightgbm"
+MODEL_PATH = os.path.join("models", f"{ALGO_NAME}_best_model.pkl")
 model = joblib.load(MODEL_PATH)
 
 X_train = pd.read_csv("data/processed/X_train.csv")
