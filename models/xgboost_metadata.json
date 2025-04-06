@@ -1,0 +1,12 @@
+{
+    "model_path": "models/xgboost_best_model.pkl",
+    "trained_at": "2025-04-07 00:22:16",
+    "accuracy": 0.8133427963094393,
+    "roc_auc": 0.8653034976761518,
+    "best_params": {
+        "n_estimators": 78,
+        "learning_rate": 0.20484974739742326,
+        "max_depth": 3,
+        "min_samples_split": 3
+    }
+}
