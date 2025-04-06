@@ -1,0 +1,12 @@
+{
+    "model_path": "models/random_forest_best_model.pkl",
+    "trained_at": "2025-04-07 00:28:11",
+    "accuracy": 0.7750177430801988,
+    "roc_auc": 0.8394151044955334,
+    "best_params": {
+        "n_estimators": 50,
+        "max_depth": 15,
+        "min_samples_split": 8,
+        "max_features": "sqrt"
+    }
+}
