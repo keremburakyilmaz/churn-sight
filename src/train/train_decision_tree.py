@@ -41,6 +41,9 @@ class DecisionTreeClassifier:
         left_indices = X[:, best_feat] < best_thresh
         right_indices = X[:, best_feat] >= best_thresh
 
+        if np.sum(left_indices) == 0 or np.sum(right_indices) == 0:
+            return DecisionTreeNode(value=self._most_common_label(y))
+
         left = self._grow_tree(X[left_indices], y[left_indices], depth + 1)
         right = self._grow_tree(X[right_indices], y[right_indices], depth + 1)
         return DecisionTreeNode(best_feat, best_thresh, left, right)

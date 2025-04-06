@@ -1,10 +1,10 @@
 {
     "model_path": "models/decision_tree_best_model.pkl",
-    "trained_at": "2025-04-06 23:09:40",
+    "trained_at": "2025-04-06 23:40:19",
     "accuracy": 0.7785663591199432,
     "roc_auc": 0.7404729988510149,
     "best_params": {
         "max_depth": 3,
-        "min_samples_split": 6
+        "min_samples_split": 5
     }
 }
