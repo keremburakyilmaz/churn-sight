@@ -1,0 +1,12 @@
+{
+    "model_path": "models/mlp_best_model.pkl",
+    "trained_at": "2025-04-07 01:20:08",
+    "accuracy": 0.7665010645848119,
+    "roc_auc": 0.8038353845994595,
+    "best_params": {
+        "hidden_size": 128,
+        "lr": 0.007731002342828516,
+        "n_iters": 2361,
+        "activation": "sigmoid"
+    }
+}
