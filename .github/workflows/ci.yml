@@ -29,13 +29,11 @@ jobs:
           flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 src/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
-
       - name: Run tests with pytest
         env:
-          PYTHONPATH: ${{ env.PYTHONPATH }}
-        run: pytest tests/
+          PYTHONPATH: src
+        run: |
+          pytest tests/
 
       - name: Build Docker image
-        run: docker build -t churn-sight-api .
+        run: docker build -t churn-sight .
