@@ -1,89 +1,79 @@
 import numpy as np
 from sklearn.metrics import accuracy_score, roc_auc_score
 from train_optuna import load_processed_data
-
 from train_logistic_regression import LogisticRegression
-from train_mlp import MLPClassifier
+from train_decision_tree import DecisionTreeClassifier
 from train_random_forest import RandomForestClassifier
 from train_xgboost import XGBoostClassifier
-from train_decision_tree import DecisionTreeClassifier
-from train_gaussian_naive_bayes import GaussianNaiveBayes
 from train_lgbm import train_lgbm
-
-
-class MetaClassifier:
-    def __init__(self, base_models, meta_model):
-        self.base_models = base_models
-        self.meta_model = meta_model
-        self.base_predictions = None
-
-    def fit(self, X, y):
-        base_outputs = []
-        for model in self.base_models:
-            model.fit(X, y)
-            base_outputs.append(model.predict_proba(X))
-        self.base_predictions = np.column_stack(base_outputs)
-        self.meta_model.fit(self.base_predictions, y)
-
-    def predict(self, X):
-        base_outputs = []
-        for model in self.base_models:
-            base_outputs.append(model.predict_proba(X))
-        stacked_input = np.column_stack(base_outputs)
-        return self.meta_model.predict(stacked_input)
-
-    def predict_proba(self, X):
-        base_outputs = []
-        for model in self.base_models:
-            base_outputs.append(model.predict_proba(X))
-        stacked_input = np.column_stack(base_outputs)
-        return self.meta_model.predict_proba(stacked_input)
-
+from train_mlp import MLPClassifier
+from train_gaussian_naive_bayes import GaussianNaiveBayes
 
 def train_meta_classifier():
     X_train, X_test, y_train, y_test = load_processed_data()
 
-    lgbm_model, _, _, _, _ = train_lgbm({
+    dt = DecisionTreeClassifier()
+    dt.fit(X_train, y_train)
+    dt_train_pred = dt.predict_proba(X_train)[:, 1]
+    dt_test_pred = dt.predict_proba(X_test)[:, 1]
+
+    rf = RandomForestClassifier()
+    rf.fit(X_train, y_train)
+    rf_train_pred = rf.predict_proba(X_train)[:, 1]
+    rf_test_pred = rf.predict_proba(X_test)[:, 1]
+
+    xgb = XGBoostClassifier()
+    xgb.fit(X_train, y_train)
+    xgb_train_pred = xgb.predict_proba(X_train)
+    xgb_test_pred = xgb.predict_proba(X_test)
+
+    mlp = MLPClassifier(input_size=X_train.shape[1])
+    mlp.fit(X_train, y_train)
+    mlp_train_pred = mlp.predict_proba(X_train)
+    mlp_test_pred = mlp.predict_proba(X_test)
+
+    nb = GaussianNaiveBayes()
+    nb.fit(X_train, y_train)
+    nb_train_pred = nb.predict_proba(X_train)
+    nb_test_pred = nb.predict_proba(X_test)
+
+    lgbm_model, _ = train_lgbm({
         "objective": "binary",
         "metric": "auc",
         "boosting_type": "gbdt",
-        "learning_rate": 0.05,
-        "n_estimators": 100
+        "n_estimators": 100,
+        "learning_rate": 0.1,
+        "num_leaves": 31,
+        "max_depth": -1,
+        "min_child_samples": 20,
+        "subsample": 1.0,
+        "colsample_bytree": 1.0,
+        "lambda_l1": 0.0,
+        "lambda_l2": 0.0
     })
+    lgb_train_pred = lgbm_model.predict_proba(X_train)[:, 1]
+    lgb_test_pred = lgbm_model.predict_proba(X_test)[:, 1]
 
-    class LightGBMWrapper:
-        def __init__(self, model):
-            self.model = model
+    print("Stacking predictions for meta-classifier...")
+    meta_X_train = np.column_stack([
+        dt_train_pred, rf_train_pred, xgb_train_pred, mlp_train_pred, nb_train_pred, lgb_train_pred
+    ])
+    meta_X_test = np.column_stack([
+        dt_test_pred, rf_test_pred, xgb_test_pred, mlp_test_pred, nb_test_pred, lgb_test_pred
+    ])
 
-        def fit(self, X, y):
-            pass
+    meta_model = LogisticRegression(lr=0.1, n_iters=1000)
+    meta_model.fit(meta_X_train, y_train)
 
-        def predict_proba(self, X):
-            return self.model.predict_proba(X)
+    meta_pred = meta_model.predict(meta_X_test)
+    meta_proba = meta_model.predict_proba(meta_X_test)
 
-    base_models = [
-        LogisticRegression(lr=0.01, n_iters=1000),
-        MLPClassifier(input_size=X_train.shape[1], hidden_size=64, output_size=1, lr=0.01, epochs=50),
-        RandomForestClassifier(n_estimators=10, max_depth=5),
-        XGBoostClassifier(n_estimators=5, learning_rate=0.1),
-        DecisionTreeClassifier(max_depth=5, min_samples_split=2),
-        GaussianNaiveBayes(),
-        LightGBMWrapper(lgbm_model)
-    ]
+    acc = accuracy_score(y_test, meta_pred)
+    auc = roc_auc_score(y_test, meta_proba)
 
-    meta_model = LogisticRegression(lr=0.01, n_iters=1000)
-    meta_clf = MetaClassifier(base_models, meta_model)
-    meta_clf.fit(X_train, y_train)
-
-    y_pred = meta_clf.predict(X_test)
-    y_proba = meta_clf.predict_proba(X_test)
-
-    accuracy = accuracy_score(y_test, y_pred)
-    roc_auc = roc_auc_score(y_test, y_proba)
-
-    print(f"Meta Classifier (Custom Logistic Meta) - Accuracy: {accuracy:.4f}, ROC-AUC: {roc_auc:.4f}")
-    return meta_clf
-
+    print(f"\nMeta-classifier evaluation:")
+    print(f"Accuracy: {acc:.4f}")
+    print(f"ROC-AUC:  {auc:.4f}")
 
 if __name__ == "__main__":
     train_meta_classifier()
