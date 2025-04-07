@@ -123,4 +123,4 @@ def decision_tree_objective(trial):
 
 
 if __name__ == "__main__":
-    run_optuna(decision_tree_objective, train_decision_tree, algo_name="decision_tree", n_trials=30)
+    run_optuna(decision_tree_objective, train_decision_tree, algo_name="decision_tree", n_trials=5)

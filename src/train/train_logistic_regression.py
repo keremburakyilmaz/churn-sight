@@ -53,4 +53,4 @@ def logistic_regression_objective(trial):
     return scores["roc_auc"]
 
 if __name__ == "__main__":
-    run_optuna(logistic_regression_objective, train_logistic_regression, algo_name="logistic_regression", n_trials=30)
+    run_optuna(logistic_regression_objective, train_logistic_regression, algo_name="logistic_regression", n_trials=5)

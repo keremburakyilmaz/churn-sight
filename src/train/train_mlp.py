@@ -99,4 +99,4 @@ def mlp_objective(trial):
 
 
 if __name__ == "__main__":
-    run_optuna(mlp_objective, train_mlp, algo_name="mlp", n_trials=30)
+    run_optuna(mlp_objective, train_mlp, algo_name="mlp", n_trials=5)

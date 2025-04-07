@@ -30,4 +30,4 @@ def lgbm_objective(trial):
     return scores["roc_auc"]
 
 if __name__ == "__main__":
-    run_optuna(lgbm_objective, train_lgbm, algo_name="lightgbm", n_trials=20)
+    run_optuna(lgbm_objective, train_lgbm, algo_name="lightgbm", n_trials=5)

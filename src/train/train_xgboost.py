@@ -127,4 +127,4 @@ def xgboost_objective(trial):
     return scores["roc_auc"]
 
 if __name__ == "__main__":
-    run_optuna(xgboost_objective, train_xgboost, algo_name="xgboost", n_trials=30)
+    run_optuna(xgboost_objective, train_xgboost, algo_name="xgboost", n_trials=5)

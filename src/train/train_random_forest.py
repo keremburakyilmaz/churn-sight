@@ -79,4 +79,4 @@ def random_forest_objective(trial):
 
 
 if __name__ == "__main__":
-    run_optuna(random_forest_objective, train_random_forest, algo_name="random_forest", n_trials=30)
+    run_optuna(random_forest_objective, train_random_forest, algo_name="random_forest", n_trials=5)
