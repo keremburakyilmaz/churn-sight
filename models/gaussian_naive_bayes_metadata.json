@@ -1,0 +1,7 @@
+{
+    "model_path": "models/gaussian_naive_bayes_best_model.pkl",
+    "trained_at": "2025-04-07 12:19:34",
+    "accuracy": 0.6657203690560681,
+    "roc_auc": 0.8377640854182409,
+    "best_params": {}
+}
